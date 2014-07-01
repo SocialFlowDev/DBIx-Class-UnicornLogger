@@ -8,6 +8,7 @@ extends 'DBIx::Class::Storage::Statistics';
 use SQL::Abstract::Tree;
 use Log::Structured;
 use Log::Sprintf;
+use DBIx::Class::UnicornLogger::SQLiteLog::Schema;
 
 my %code_to_method = (
   C => 'log_package',
@@ -73,6 +74,23 @@ has _structured_logger => (
    lazy => 1,
    builder => '_build_structured_logger',
 );
+
+has log_schema => (
+    is => 'lazy',
+);
+
+has log_schema_entry_rs => (
+    is => 'lazy',
+);
+
+has sqlite_path => (
+    is => 'lazy',
+);
+
+sub _build_sqlite_path { $ENV{DBICU_SQLITE_PATH} }
+sub _build_log_schema_entry_rs {
+    shift->log_schema->resultset("Entry");
+}
 
 sub _build_structured_logger {
    my $self = shift;
@@ -174,7 +192,9 @@ sub print {
 }
 
 sub query_start {
-  my ($self, $string, @bind) = @_;
+    my $self = shift;
+    $self->log_schema_entry_rs->query_start(@_) if $self->log_schema;
+  my ($string, @bind) = @_;
 
   if(defined $self->callback) {
     $string =~ m/^(\w+)/;
@@ -190,7 +210,20 @@ sub query_start {
 }
 
 sub query_end {
-  $_[0]->debugfh->print($_[0]->_clear_line_str) if $_[0]->_show_progress
+    my $self = shift;
+    $self->log_schema_entry_rs->query_end(@_) if $self->log_schema;
+    $self->debugfh->print( $self->_clear_line_str ) if $self->_show_progress;
+}
+
+sub _build_log_schema {
+    my $self     = shift;
+    my $filename = $self->sqlite_path;
+    return unless $filename;
+    my $dsn = sprintf( "dbi:SQLite:dbname=%s", $filename );
+    my $schema =
+      DBIx::Class::UnicornLogger::SQLiteLog::Schema->connect( $dsn, "", "" );
+    $schema->deploy_if_needed;
+    return $schema;
 }
 
 1;
