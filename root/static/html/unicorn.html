@@ -57,7 +57,7 @@
                         <div><small>{{ q.params }}</small></div>
                         <div>
                             <a ng-click="hide_stack_trace = true" ng-hide="hide_stack_trace">- stack trace</a>
-                            <a ng-click="show_stack_trace(q); hide_stack_trace = false" ng-hide="!hide_stack_trace">+ stack trace</a>
+                            <a ng-click="q.show_stack_trace(); hide_stack_trace = false" ng-hide="!hide_stack_trace">+ stack trace</a>
                         </div>
                         <table class="table table-striped table-condensed" ng-hide="hide_stack_trace">
                             <div class="stack_trace">

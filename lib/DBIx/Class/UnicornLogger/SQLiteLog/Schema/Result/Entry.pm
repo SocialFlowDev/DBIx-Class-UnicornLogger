@@ -16,7 +16,6 @@ __PACKAGE__->add_columns(
     params      => { data_type => 'text',      default_value     => '[]' },
     stack_trace => { data_type => 'text',      default_value     => '[]' },
     runtime     => { data_type => 'float' },
-    schema_class => { data_type => 'text' },
     create_date => { data_type => 'timestamp', set_on_create     => 1 },
 );
 
