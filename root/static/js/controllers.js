@@ -7,7 +7,7 @@ unicornApp.controller('UnicornController', ['$scope', '$http', function($scope, 
     $scope.orderProp = '-entry_id';
     var original_data = [];
     var rolled_up_data = {};
-    $http.get("http://localhost:5001").success(function(data) {
+    $http.get("/").success(function(data) {
         var munged_data = data.map(function(el) {
             el.runtime = Math.round(el.runtime * 1000 * 100) / 100;
             el.canonical_st = el.stack_trace.join("\n");
