@@ -18,7 +18,10 @@ sub _build_schema {
 }
 
 sub _build_entry_rs {
-    shift->schema->resultset("Entry");
+    shift->schema->resultset("Entry")->search(
+        undef,
+        {
+            prefetch => [qw/query stacktrace/] } );
 }
 
 sub get_page {
@@ -33,6 +36,8 @@ sub _data {
         map {
             my %h = $_->get_inflated_columns;
             $h{create_date} = $h{create_date}->epoch;
+            $h{stack_trace} = $_->stacktrace->data;
+            $h{query} = $_->query->query;
             \%h
         } $rs->all
       ]
