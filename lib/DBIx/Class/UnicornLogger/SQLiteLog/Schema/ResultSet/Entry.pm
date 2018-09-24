@@ -36,7 +36,8 @@ sub query_end {
     my ( $qq, $params, $start_time, $stack_trace ) = @$query;
     my $runtime = Time::HiRes::time() - $start_time;
     my $frames  = [ map { $_->as_string } $stack_trace->frames ];
-    my $hash    = Digest::SHA::sha1_hex( $stack_trace->as_string );
+    s/0x\w+\b/\[REF\]/g for @$frames;
+    my $hash    = Digest::SHA::sha1_hex( join("\n",@$frames) );
     my $schema  = $self->result_source->schema;
     my $guard   = $schema->txn_scope_guard;
 

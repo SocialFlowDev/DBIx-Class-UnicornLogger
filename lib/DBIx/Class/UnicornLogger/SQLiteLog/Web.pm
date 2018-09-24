@@ -30,7 +30,17 @@ sub get_page {
 }
 
 sub _data {
-    my ($self) = @_;
+    my ($self,$parameters) = @_;
+    my $dir      = $parameters->{dir}      // 'desc';
+    my $order_by = $parameters->{order_by} // 'entry_id';
+    my $page     = $parameters->{page}     // 1;
+    my $rows = $parameters->{rows} // 100;
+    $dir = "-$dir";
+    my $attrs = {
+            order_by => { $dir => $order_by },
+            rows => $rows,
+            page => $page,
+    };
     my $rs = $self->entry_rs;
     return [
         map {
@@ -39,7 +49,7 @@ sub _data {
             $h{stack_trace} = $_->stacktrace->data;
             $h{query} = $_->query->query;
             \%h
-        } $rs->all
+        } $rs->search(undef,{order_by => {-desc => 'entry_id' }, rows => 300 })->all
       ]
 }
 
@@ -55,7 +65,7 @@ sub request {
     my $req = Plack::Request->new($env);
     my $path = $req->path;
     warn $path;
-    return $self->_render( $req, $self->_data );
+    return $self->_render( $req, $self->_data( $req->parameters ) );
 }
 
 sub query_rollups {

@@ -194,6 +194,7 @@ sub print {
 sub query_start {
     my $self = shift;
     $self->log_schema_entry_rs->query_start(@_) if $self->log_schema;
+    return;
   my ($string, @bind) = @_;
 
   if(defined $self->callback) {
@@ -212,6 +213,7 @@ sub query_start {
 sub query_end {
     my $self = shift;
     $self->log_schema_entry_rs->query_end(@_) if $self->log_schema;
+    return;
     $self->debugfh->print( $self->_clear_line_str ) if $self->_show_progress;
 }
 
